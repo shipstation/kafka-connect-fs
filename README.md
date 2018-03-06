@@ -1,25 +1,13 @@
-# Kafka Connect FileSystem Connector [![Build Status](https://travis-ci.org/mmolimar/kafka-connect-fs.svg?branch=master)](https://travis-ci.org/mmolimar/kafka-connect-fs)[![Coverage Status](https://coveralls.io/repos/github/mmolimar/kafka-connect-fs/badge.svg?branch=master)](https://coveralls.io/github/mmolimar/kafka-connect-fs?branch=master)
+This is a Shipstation fork of https://github.com/mmolimar/kafka-connect-fs
 
-**kafka-connect-fs** is a [Kafka Connector](http://kafka.apache.org/documentation.html#connect) 
-for reading records from files in the file systems specified and load them into Kafka.
+It patches up a couple things for use in our environment. See commits on master of this fork to see what. At the time of this writing, it was to fix up a few dependency versions and prevent OOMs in the connector when using it against large numbers of files in S3.
 
-Documentation for this connector can be found [here](http://kafka-connect-fs.readthedocs.io/).
+Packing it up for use in Kafka Connect (assuming you have the `infrastructure` repo checked out at `~/Projects/`):
 
-## Development
+```
+<change things>
+mvn clean package
+cp target/kafka-connect-fs-0.3-SNAPSHOT-package/share/java/kafka-connect-fs/* ~/Projects/infrastructure/kubernetes/servicedefs/confluent-platform/kafka-connect/jars/kafka-connect-fs/
+```
 
-To build a development version you'll need a recent version of Kafka. You can build
-kafka-connect-fs with Maven using the standard lifecycle phases.
-
-## FAQ
-
-Some frequently asked questions on Kafka Connect FileSystem Connector can be found here -
-http://kafka-connect-fs.readthedocs.io/en/latest/faq.html
-
-## Contribute
-
-- Source Code: https://github.com/mmolimar/kafka-connect-fs
-- Issue Tracker: https://github.com/mmolimar/kafka-connect-fs/issues
-
-## License
-
-Released under the Apache License, version 2.0.
+...then go over to `~/Projects/infrastructure/kubernetes/servicedefs/confluent-platform/kafka-connect` and run `./build-and-push.sh` to get it into our Kafka Connect docker image.
