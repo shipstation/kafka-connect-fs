@@ -27,6 +27,7 @@ public class FsSourceTask extends SourceTask {
     private AtomicBoolean stop;
     private FsSourceTaskConfig config;
     private Policy policy;
+    private List<FileMetadata> files;
 
     @Override
     public String version() {
@@ -61,14 +62,19 @@ public class FsSourceTask extends SourceTask {
         stop = new AtomicBoolean(false);
     }
 
+
     @Override
     public List<SourceRecord> poll() throws InterruptedException {
         while (stop != null && !stop.get() && !policy.hasEnded()) {
             log.trace("Polling for new data");
-
             final List<SourceRecord> results = new ArrayList<>();
-            List<FileMetadata> files = filesToProcess();
-            files.forEach(metadata -> {
+            if (files == null || files.size() == 0) {
+                files = filesToProcess();
+            }
+            int take = Math.min(files.size(), 10);
+            List<FileMetadata> toProcess = new ArrayList<FileMetadata>(files.subList(0, take));
+            files = new ArrayList<FileMetadata>(files.subList(take, files.size()));
+            toProcess.forEach(metadata -> {
                 try (FileReader reader = policy.offer(metadata, context.offsetStorageReader())) {
                     log.info("Processing records for file {}", metadata);
                     while (reader.hasNext()) {
